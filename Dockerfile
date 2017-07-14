@@ -19,8 +19,8 @@ ADD docker/templates /app/templates
 ADD docker/scripts/ /app/scripts/
 
 # Get the real content
-ADD https://www.thregr.org/~wavexx/software/dl/releases/dl-${DL_VERSION}.zip /var/www/
-CMD cd /var/www && rm -fr /var/www/html && unzip dl-${DL_VERSION}.zip "dl-${DL_VERSION}/htdocs/*" -d /var/www/ && mv -v /var/www/dl-{DL_VERSION}/htdocs /var/www/html && chown -R www-data\: /var/www/html
+ADD https://github.com/wavexx/dl/archive/master.zip /var/www/
+CMD cd /var/www && rm -fr /var/www/html && unzip master.zip "master/htdocs/*" -d /var/www/ && mv -v /var/www/master/htdocs /var/www/html && chown -R www-data\: /var/www/html
 
 # Include a DL Config inside "include" folder to load config from "/app/config" so we can use a volume for it
 COPY docker/replacements/config.inc.php /var/www/html/include/config.php
