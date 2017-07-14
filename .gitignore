@@ -1,0 +1,6 @@
+*.mo
+*~
+*.pyc
+.*.swp
+/htdocs/include/config.php
+/htdocs/static/guide/*/*.html
