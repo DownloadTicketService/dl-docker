@@ -18,9 +18,15 @@ ADD docker/templates /app/templates
 # Copy scripts folder
 ADD docker/scripts/ /app/scripts/
 
-# Get the real content
+# Get the real content and signature
 ADD https://www.thregr.org/~wavexx/software/dl/releases/dl-${DL_VERSION}.zip /var/www/
-CMD cd /var/www && rm -fr /var/www/html && unzip dl-${DL_VERSION}.zip "dl-${DL_VERSION}/htdocs/*" -d /var/www/ && mv -v /var/www/dl-{DL_VERSION}/htdocs /var/www/html && chown -R www-data\: /var/www/html
+ADD https://www.thregr.org/~wavexx/software/dl/releases/dl-${DL_VERSION}.zip.asc /var/www/
+
+# Obtain public key from PGP Keyserver and validate signature before continue
+RUN gpg --keyserver pgp.mit.edu --recv 0x2BB7D6F2153410EC && gpg --verify-file /var/www/dl-${DL_VERSION}.zip.asc
+
+# Deploy content in the right place
+RUN rm -fr /var/www/html && cd /var/www/ && unzip dl-${DL_VERSION}.zip "dl-${DL_VERSION}/htdocs/*" -d /var/www/ && mv -v /var/www/dl-${DL_VERSION}/htdocs /var/www/html && chown -R www-data\: /var/www/html
 
 # Include a DL Config inside "include" folder to load config from "/app/config" so we can use a volume for it
 COPY docker/replacements/config.inc.php /var/www/html/include/config.php
