@@ -6,9 +6,23 @@ LABEL mantainer "Roberto Salgado <drober@gmail.com>"
 
 ENV DL_VERSION 0.17.1
 
+# Default SQLite URI
+ENV SQL_URI sqlite:\$spoolDir/data.sdb
+
+# Default PHP uploads limitation
+ENV UPLOAD_MAX_FILESIZE 20M
+ENV POST_MAX_SIZE 20M
+
+# Default PHP memory limit
+ENV MEMORY_LIMIT 25M
+
+ENV PATH="/app/scripts:${PATH}"
+
 USER root
 
-RUN apt update && apt install -y sqlite3 unzip && apt-get clean
+# Get some packages from dristro
+RUN apt update && apt install --no-install-recommends -y sqlite3 unzip cron && apt-get clean
+
 # Create app directory for entrypoint and templates
 RUN mkdir /app ; mkdir /app/config
 
@@ -49,18 +63,6 @@ VOLUME /app/config
 ## if you want to use HTTPS, try Traefik, HAProxy or Apache Proxy
 EXPOSE 80
 
-# Default SQLite URI
-ENV SQL_URI sqlite:\$spoolDir/data.sdb
-
-# Default PHP uploads limitation
-ENV UPLOAD_MAX_FILESIZE 20M
-ENV POST_MAX_SIZE 20M
-
-# Default PHP memory limit
-ENV MEMORY_LIMIT 25M
-
-ENV PATH="/app/scripts:${PATH}"
-# Copying DL public content into apache's exposed folder
 
 ADD docker/run.sh /app/
 # Use run script as container's CMD

@@ -65,6 +65,25 @@ fi
 
 chown www-data:www-data /var/spool/dl/data
 
-
-
+if [ ! -f "/usr/sbin/cron" ];
+then
+	echo "WARNING: This image is supposed to have cron installed... there could be some mistakes"
+else
+	if [ ! -d "/etc/cron.daily" ];
+	then
+		echo "No cron.daily folder found. "
+		mkdir -v /etc/cron.daily
+	fi
+	if [ ! -f "/etc/cron.daily/dl" ];
+	then
+		echo "No daily crontab for DL expiry found. Creating it"
+		cat > /etc/cron.daily/dl <<EOF
+#!/bin/sh
+cd /var/www/html/include/scripts/
+su -s /bin/bash -c '/usr/local/bin/php expire.php' www-data
+EOF
+		chmod 0700 /etc/cron.daily/dl
+	fi
+fi
+service cron start
 apache2-foreground
