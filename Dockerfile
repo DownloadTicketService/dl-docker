@@ -10,11 +10,10 @@ ENV DL_VERSION 0.17.1
 ENV SQL_URI sqlite:\$spoolDir/data.sdb
 
 # Default PHP uploads limitation
-ENV UPLOAD_MAX_FILESIZE 20M
-ENV POST_MAX_SIZE 20M
+ENV UPLOAD_MAX_FILESIZE=20M POST_MAX_SIZE=20M
 
 # Default PHP memory limit
-ENV MEMORY_LIMIT 25M
+ENV MEMORY_LIMIT=25M
 
 ENV PATH="/app/scripts:${PATH}"
 
@@ -56,13 +55,11 @@ RUN ln -s /app/scripts/change_admin_pass.sh /usr/local/bin/change_admin_pass && 
     chown -R www-data:www-data /var/log/dl
 
 # Use a volume for the default storing path
-VOLUME /var/spool/dl
-VOLUME /app/config
+VOLUME ["/var/spool/dl", "/app/config"]
 
 # Container exposing port 80
 ## if you want to use HTTPS, try Traefik, HAProxy or Apache Proxy
-EXPOSE 80
-
+EXPOSE 80 443
 
 ADD docker/run.sh /app/
 # Use run script as container's CMD
