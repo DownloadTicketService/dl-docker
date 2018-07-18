@@ -1,14 +1,27 @@
 FROM php:7.0-apache
 
-LABEL version="0.17.1"
+LABEL version 0.18.1
 LABEL description="DL-Ticket by Yuri D’Elia <wavexx@thregr.org>"
 LABEL mantainer "Roberto Salgado <drober@gmail.com>"
 
-ENV DL_VERSION 0.17.1
+ENV DL_VERSION 0.18.1
+
+# Default SQLite URI
+ENV SQL_URI sqlite:\$spoolDir/data.sdb
+
+# Default PHP uploads limitation
+ENV UPLOAD_MAX_FILESIZE=20M POST_MAX_SIZE=20M
+
+# Default PHP memory limit
+ENV MEMORY_LIMIT=25M
+
+ENV PATH="/app/scripts:${PATH}"
 
 USER root
 
-RUN apt update && apt install -y sqlite3 unzip && apt-get clean
+# Get some packages from dristro
+RUN apt update && apt install --no-install-recommends -y sqlite3 unzip cron gpg && apt-get clean
+
 # Create app directory for entrypoint and templates
 RUN mkdir /app ; mkdir /app/config
 
@@ -18,9 +31,15 @@ ADD docker/templates /app/templates
 # Copy scripts folder
 ADD docker/scripts/ /app/scripts/
 
-# Get the real content
+# Get the real content and signature
 ADD https://www.thregr.org/~wavexx/software/dl/releases/dl-${DL_VERSION}.zip /var/www/
-CMD cd /var/www && rm -fr /var/www/html && unzip dl-${DL_VERSION}.zip "dl-${DL_VERSION}/htdocs/*" -d /var/www/ && mv -v /var/www/dl-{DL_VERSION}/htdocs /var/www/html && chown -R www-data\: /var/www/html
+ADD https://www.thregr.org/~wavexx/software/dl/releases/dl-${DL_VERSION}.zip.asc /var/www/
+
+# Obtain public key from PGP Keyserver and validate signature before continue
+RUN gpg --keyserver pgp.mit.edu --recv 0x2BB7D6F2153410EC && gpg --verify-file /var/www/dl-${DL_VERSION}.zip.asc
+
+# Deploy content in the right place
+RUN rm -fr /var/www/html && cd /var/www/ && unzip dl-${DL_VERSION}.zip "dl-${DL_VERSION}/htdocs/*" -d /var/www/ && mv -v /var/www/dl-${DL_VERSION}/htdocs /var/www/html && chown -R www-data\: /var/www/html
 
 # Include a DL Config inside "include" folder to load config from "/app/config" so we can use a volume for it
 COPY docker/replacements/config.inc.php /var/www/html/include/config.php
@@ -36,25 +55,11 @@ RUN ln -s /app/scripts/change_admin_pass.sh /usr/local/bin/change_admin_pass && 
     chown -R www-data:www-data /var/log/dl
 
 # Use a volume for the default storing path
-VOLUME /var/spool/dl
-VOLUME /app/config
+VOLUME ["/var/spool/dl", "/app/config"]
 
 # Container exposing port 80
 ## if you want to use HTTPS, try Traefik, HAProxy or Apache Proxy
-EXPOSE 80
-
-# Default SQLite URI
-ENV SQL_URI sqlite:\$spoolDir/data.sdb
-
-# Default PHP uploads limitation
-ENV UPLOAD_MAX_FILESIZE 20M
-ENV POST_MAX_SIZE 20M
-
-# Default PHP memory limit
-ENV MEMORY_LIMIT 25M
-
-ENV PATH="/app/scripts:${PATH}"
-# Copying DL public content into apache's exposed folder
+EXPOSE 80 443
 
 ADD docker/run.sh /app/
 # Use run script as container's CMD
