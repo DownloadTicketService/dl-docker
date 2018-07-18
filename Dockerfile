@@ -1,6 +1,6 @@
 FROM php:7.0-apache
 
-LABEL version="0.18.1"
+LABEL version 0.18.1
 LABEL description="DL-Ticket by Yuri D’Elia <wavexx@thregr.org>"
 LABEL mantainer "Roberto Salgado <drober@gmail.com>"
 
@@ -20,7 +20,7 @@ ENV PATH="/app/scripts:${PATH}"
 USER root
 
 # Get some packages from dristro
-RUN apt update && apt install --no-install-recommends -y sqlite3 unzip cron && apt-get clean
+RUN apt update && apt install --no-install-recommends -y sqlite3 unzip cron gpg && apt-get clean
 
 # Create app directory for entrypoint and templates
 RUN mkdir /app ; mkdir /app/config
