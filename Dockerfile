@@ -20,7 +20,7 @@ ENV PATH="/app/scripts:${PATH}"
 USER root
 
 # Get some packages from dristro
-RUN apt update && apt install --no-install-recommends -y sqlite3 unzip cron gpg && apt-get clean
+RUN apt update && apt install --no-install-recommends -y sqlite3 unzip cron gpg dirmngr && apt-get clean
 
 # Create app directory for entrypoint and templates
 RUN mkdir /app ; mkdir /app/config
