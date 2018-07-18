@@ -1,10 +1,10 @@
 FROM php:7.0-apache
 
-LABEL version="0.17.1"
+LABEL version="0.18.1"
 LABEL description="DL-Ticket by Yuri D’Elia <wavexx@thregr.org>"
 LABEL mantainer "Roberto Salgado <drober@gmail.com>"
 
-ENV DL_VERSION 0.17.1
+ENV DL_VERSION 0.18.1
 
 # Default SQLite URI
 ENV SQL_URI sqlite:\$spoolDir/data.sdb
